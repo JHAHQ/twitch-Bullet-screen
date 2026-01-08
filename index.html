@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>Twitch 彈幕控制台 v2.0</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        /* 基礎設置：讓背景全透明 */
+        html, body {
+            margin: 0; padding: 0;
+            background: transparent !important;
+            color: #efeff1;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+            width: 100vw; height: 100vh;
+        }
+
+        /* 實體設置窗樣式 (v1.2 樣式回歸) */
+        .controls {
+            position: fixed;
+            top: 20px; left: 20px;
+            width: 380px;
+            background: #18181b !important; /* 確保是不透明暗色 */
+            border: 1px solid #303032;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 拖動標題區列 */
+        .drag-header {
+            background: #1f1f23;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            -webkit-app-region: drag; /* 讓這裡可以移動視窗 */
+            border-radius: 12px 12px 0 0;
+            border-bottom: 1px solid #303032;
+            cursor: move;
+        }
+
+        .window-controls { -webkit-app-region: no-drag; }
+        .win-btn { background: transparent; border: none; color: #adadb8; cursor: pointer; padding: 4px 8px; }
+        .win-btn:hover { color: white; }
+        .win-btn.close:hover { color: #ff4e4e; }
+
+        .control-content {
+            padding: 20px;
+            -webkit-app-region: no-drag;
+        }
+
+        .flex-row { display: flex; gap: 10px; margin-top: 8px; align-items: center; }
+        input, select { background: #000; color: white; border: 1px solid #3a3a3d; padding: 8px; border-radius: 6px; width: 100%; box-sizing: border-box; }
+        button { background: #9147ff; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .status-dot.disconnected { background: #ff4b4b; }
+        .status-dot.connected { background: #00f593; box-shadow: 0 0 8px #00f593; }
+
+        .setting-item { margin-top: 15px; }
+        .avatar-preview { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #9147ff; }
+
+        /* 彈幕顯示層 */
+        #danmu-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
+        .danmu { position: absolute; white-space: nowrap; text-shadow: 2px 2px 2px #000; font-weight: bold; animation: scroll linear forwards; }
+        .user { color: #bf94ff; margin-right: 8px; }
+        @keyframes scroll { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }
+    </style>
+</head>
+<body>
+    <div id="app" @mousemove="handleMouseMove">
+        <main class="controls" v-show="!isMinimized" @mouseenter="setIgnoreMouse(false)" @mouseleave="setIgnoreMouse(true)">
+            <div class="drag-header">
+                <div style="font-weight: bold;"><i class="fab fa-twitch"></i> 彈幕控制台 <span :class="['status-dot', wsStatus]"></span></div>
+                <div class="window-controls">
+                    <button @click="minimizeWindow" class="win-btn"><i class="fas fa-minus"></i></button>
+                    <button @click="closeWindow" class="win-btn"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div class="control-content">
+                <div class="setting-item">
+                    <label style="font-size: 0.8em; color: #adadb8;">狀態: {{ wsStatusText }}</label>
+                    <div class="flex-row">
+                        <input v-model="channelName" placeholder="Twitch ID" @keyup.enter="connectTwitch">
+                        <button @click="connectTwitch">連線</button>
+                        <img v-if="channelAvatar" :src="channelAvatar" class="avatar-preview">
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label>關鍵字過濾</label>
+                    <input v-model="filterInput" @input="updateFilterList" placeholder="髒話,洗版...">
+                </div>
+                <div class="setting-item">
+                    <label>速度: {{ settings.speed }}s | 大小: {{ settings.fontSize }}px</label>
+                    <input type="range" v-model="settings.speed" min="3" max="15">
+                    <input type="range" v-model="settings.fontSize" min="16" max="60">
+                </div>
+                <div class="setting-item">
+                    <label>顯示區域</label>
+                    <select v-model="settings.region">
+                        <option value="full">全螢幕</option>
+                        <option value="top">上半部</option>
+                        <option value="center">中間帶</option>
+                        <option value="bottom">下半部</option>
+                    </select>
+                </div>
+            </div>
+        </main>
+
+        <div v-if="isMinimized" @click="isMinimized = false" @mouseenter="setIgnoreMouse(false)" @mouseleave="setIgnoreMouse(true)" 
+             style="position:fixed; top:10px; left:10px; width:40px; height:40px; background:#9147ff; border-radius:50%; display:flex; justify-content:center; align-items:center; cursor:pointer; z-index:101; -webkit-app-region:no-drag;">
+            <i class="fab fa-twitch"></i>
+        </div>
+
+        <div id="danmu-layer">
+            <div v-for="msg in messages" :key="msg.id" class="danmu" :style="genDanmuStyle(msg)">
+                <span class="user">{{ msg.user }}:</span>
+                <span class="text">{{ msg.text }}</span>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
