@@ -1,62 +1,105 @@
 /* 全域設定 */
 body {
-    margin: 0;
-    padding: 0;
-    background-color: #0e0e10; /* Twitch 深色主題 */
+    margin: 0; padding: 0;
+    background-color: #0e0e10;
     color: #efeff1;
     font-family: 'Segoe UI', Roboto, sans-serif;
     overflow: hidden;
 }
 
 #app {
-    display: grid;
-    grid-template-columns: 350px 1fr;
-    grid-template-rows: 70px 1fr;
+    display: flex;
+    flex-direction: column;
     height: 100vh;
     padding: 20px;
-    gap: 20px;
     box-sizing: border-box;
 }
 
-/* 標頭 */
 header {
-    grid-column: 1 / span 2;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding-bottom: 15px;
     border-bottom: 1px solid #303032;
+    margin-bottom: 20px;
 }
 
-.status-tag {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.9em;
-}
+.status-tag { padding: 6px 12px; border-radius: 20px; font-size: 0.9em; }
 .disconnected { background: #3a3a3d; }
 .connected { background: #00ad7c; box-shadow: 0 0 10px rgba(0,173,124,0.5); }
 
-/* 控制區與圖表區 */
-.controls, .analytics {
-    background: #18181b;
-    padding: 20px;
-    border-radius: 12px;
-    z-index: 10;
+/* 控制面板佈局優化 */
+.dashboard {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding-left: 20px;
+    position: relative;
+    z-index: 1; /* 基礎層 */
 }
 
-.flex-row { display: flex; gap: 10px; margin-top: 5px; }
-input { flex: 1; padding: 8px; border-radius: 4px; border: 1px solid #3a3a3d; background: #000; color: white; }
-button { background: #9147ff; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; }
+.controls {
+    background: rgba(24, 24, 27, 0.9);
+    padding: 25px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    margin-top: 10px;
+    
+    /* 這裡調低層級，確保它在彈幕下方 */
+    position: relative; 
+    z-index: 5; 
+}
+
+.flex-row { display: flex; gap: 10px; margin-top: 8px; }
+
+input, .modern-select, .modern-input {
+    background: #000;
+    color: white;
+    border: 1px solid #3a3a3d;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.modern-input, .modern-select { width: 100%; box-sizing: border-box; margin-top: 8px; }
+
+button {
+    background: #9147ff;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
 button:hover { background: #772ce8; }
 button:disabled { background: #444; }
 
-.setting-item { margin: 25px 0; }
+.avatar-preview {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #9147ff;
+}
+
+.setting-item { margin-bottom: 20px; }
+.hint { font-size: 0.8em; color: #adadb8; margin-top: 4px; }
 input[type="range"] { width: 100%; accent-color: #9147ff; }
 
 /* 彈幕層與動畫 */
 #danmu-layer {
     position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    pointer-events: none;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    
+    /* 設定為最高層級，讓彈幕飛在控制面板前面 */
+    z-index: 9999; 
+    
+    /* 重要：確保彈幕層不會擋住滑鼠點擊按鈕 */
+    pointer-events: none; 
 }
 
 .danmu {

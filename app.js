@@ -6,21 +6,27 @@ createApp({
             channelName: '',
             wsStatus: 'disconnected',
             wsStatusText: '尚未連線',
-            channelAvatar: '', // 透過 Fetch 抓取的頭像
+            channelAvatar: '',
             messages: [],
+            filterInput: '', // 關鍵字輸入字串
+            filterList: [],  // 解析後的過濾清單
             settings: { 
                 speed: 8, 
                 fontSize: 24, 
                 opacity: 1,
-                region: 'full' // 區域設定：full, top, center, bottom
+                region: 'full'
             }
         }
     },
     methods: {
+        updateFilterList() {
+            // 將輸入內容依逗號拆分，並過濾掉空白項
+            this.filterList = this.filterInput.split(',').map(s => s.trim()).filter(s => s !== '');
+        },
         async connectTwitch() {
             if (!this.channelName) return;
 
-            // --- 進階技術：Fetch API 實作 (抓取頻道頭像) ---
+            // Fetch API: 獲取頻道頭像
             try {
                 const response = await fetch(`https://decapi.me/twitch/avatar/${this.channelName}`);
                 if (response.ok) {
@@ -43,30 +49,50 @@ createApp({
 
             socket.onmessage = (event) => {
                 const data = event.data;
+                if (data.startsWith('PING')) {
+                    socket.send('PONG :tmi.twitch.tv');
+                    return;
+                }
+
                 if (data.includes('PRIVMSG')) {
                     const match = data.match(/:(\w+)!.*PRIVMSG #\w+ :(.*)/);
                     if (match) {
-                        // --- 邏輯功能：區域顯示控制 ---
+                        const user = match[1];
+                        const text = match[2];
+
+                        // 邏輯功能：關鍵字過濾
+                        if (this.filterList.some(keyword => text.includes(keyword))) {
+                            return; // 若包含關鍵字則不顯示
+                        }
+
+                        // 邏輯功能：區域顯示控制
                         let topPosition;
                         const r = this.settings.region;
-                        if (r === 'top') topPosition = Math.random() * 40; // 0-40%
-                        else if (r === 'bottom') topPosition = Math.random() * 40 + 50; // 50-90%
-                        else if (r === 'center') topPosition = Math.random() * 40 + 25; // 25-65%
+                        if (r === 'top') topPosition = Math.random() * 40;
+                        else if (r === 'bottom') topPosition = Math.random() * 40 + 50;
+                        else if (r === 'center') topPosition = Math.random() * 40 + 25;
                         else topPosition = Math.random() * 85;
 
                         const newMessage = {
                             id: Date.now() + Math.random(),
-                            user: match[1],
-                            text: match[2],
+                            user: user,
+                            text: text,
                             top: topPosition + '%'
                         };
+
                         this.messages.push(newMessage);
                         
+                        // 定時移除彈幕，釋放記憶體
                         setTimeout(() => {
                             this.messages = this.messages.filter(m => m.id !== newMessage.id);
                         }, this.settings.speed * 1000);
                     }
                 }
+            };
+
+            socket.onclose = () => {
+                this.wsStatus = 'disconnected';
+                this.wsStatusText = '連線已中斷';
             };
         },
         genDanmuStyle(msg) {

@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Twitch 彈幕互動系統 - 網頁版</title>
+    <title>Twitch 彈幕互動系統 - v1.2</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div id="app">
@@ -21,15 +20,25 @@
         <main class="dashboard">
             <section class="controls">
                 <h3><i class="fas fa-sliders-h"></i> 彈幕參數設定</h3>
-                <div class="header-left">
-                    <img v-if="channelAvatar" :src="channelAvatar" style="width: 40px; border-radius: 50%; margin-left: 10px; border: 2px solid #9147ff;">
-                </div>
+                
                 <div class="input-group">
                     <label>頻道名稱 (Twitch ID)</label>
-                    <div class="flex-row">
+                    <div class="flex-row" style="align-items: center;">
                         <input v-model="channelName" placeholder="例如: shroud" @keyup.enter="connectTwitch">
                         <button @click="connectTwitch" :disabled="wsStatus === 'connected'">連線</button>
+                        <img v-if="channelAvatar" :src="channelAvatar" class="avatar-preview">
                     </div>
+                </div>
+
+                <div class="setting-item">
+                    <label><i class="fas fa-filter"></i> 關鍵字過濾 (用逗號分隔)</label>
+                    <input 
+                        v-model="filterInput" 
+                        placeholder="例如: 髒話,洗版" 
+                        @input="updateFilterList"
+                        class="modern-input"
+                    >
+                    <p class="hint">包含關鍵字的彈幕將不會顯示</p>
                 </div>
 
                 <div class="setting-item">
@@ -46,6 +55,7 @@
                     <label>不透明度: {{ settings.opacity }}</label>
                     <input type="range" v-model="settings.opacity" min="0.1" max="1" step="0.1">
                 </div>
+
                 <div class="setting-item">
                     <label>顯示區域</label>
                     <select v-model="settings.region" class="modern-select">
@@ -54,13 +64,6 @@
                         <option value="center">中間帶</option>
                         <option value="bottom">下半部</option>
                     </select>
-                </div>
-            </section>
-
-            <section class="analytics">
-                <h3><i class="fas fa-chart-line"></i> 聊天熱度 (每10秒訊息量)</h3>
-                <div class="chart-container">
-                    <canvas id="chatChart"></canvas>
                 </div>
             </section>
         </main>
