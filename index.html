@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitch 彈幕互動系統 - 網頁版</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1><i class="fab fa-twitch"></i> Twitch 互動彈幕控制台</h1>
+            <div :class="['status-tag', wsStatus]">
+                連線狀態: {{ wsStatusText }}
+            </div>
+        </header>
+
+        <main class="dashboard">
+            <section class="controls">
+                <h3><i class="fas fa-sliders-h"></i> 彈幕參數設定</h3>
+                <div class="input-group">
+                    <label>頻道名稱 (Twitch ID)</label>
+                    <div class="flex-row">
+                        <input v-model="channelName" placeholder="例如: shroud" @keyup.enter="connectTwitch">
+                        <button @click="connectTwitch" :disabled="wsStatus === 'connected'">連線</button>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <label>彈幕速度: {{ settings.speed }}秒</label>
+                    <input type="range" v-model="settings.speed" min="3" max="15">
+                </div>
+
+                <div class="setting-item">
+                    <label>字體大小: {{ settings.fontSize }}px</label>
+                    <input type="range" v-model="settings.fontSize" min="16" max="60">
+                </div>
+
+                <div class="setting-item">
+                    <label>不透明度: {{ settings.opacity }}</label>
+                    <input type="range" v-model="settings.opacity" min="0.1" max="1" step="0.1">
+                </div>
+            </section>
+
+            <section class="analytics">
+                <h3><i class="fas fa-chart-line"></i> 聊天熱度 (每10秒訊息量)</h3>
+                <div class="chart-container">
+                    <canvas id="chatChart"></canvas>
+                </div>
+            </section>
+        </main>
+
+        <div id="danmu-layer">
+            <div v-for="msg in messages" :key="msg.id" class="danmu" :style="genDanmuStyle(msg)">
+                <span class="user">{{ msg.user }}:</span>
+                <span class="text">{{ msg.text }}</span>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
