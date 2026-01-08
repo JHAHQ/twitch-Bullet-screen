@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>Twitch 彈幕控制台 v2.1</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        html, body {
+            margin: 0; padding: 0;
+            background: transparent !important;
+            color: #efeff1;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+            width: 100vw; height: 100vh;
+        }
+
+        .controls {
+            position: absolute;
+            width: 380px;
+            background: #18181b !important;
+            border: 1px solid #303032;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            pointer-events: auto;
+        }
+
+        .drag-header {
+            background: #1f1f23;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 12px 12px 0 0;
+            border-bottom: 1px solid #303032;
+            cursor: grab;
+            user-select: none;
+        }
+        .drag-header:active { cursor: grabbing; }
+
+        /* 頭像預覽樣式 */
+        .avatar-preview {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1px solid #9147ff;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .control-content { padding: 20px; }
+        .flex-row { display: flex; gap: 10px; margin-top: 8px; align-items: center; }
+        input, select { background: #000; color: white; border: 1px solid #3a3a3d; padding: 8px; border-radius: 6px; width: 100%; box-sizing: border-box; }
+        button { background: #9147ff; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .status-dot.disconnected { background: #ff4b4b; }
+        .status-dot.connected { background: #00f593; box-shadow: 0 0 8px #00f593; }
+
+        #danmu-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 99; }
+        .danmu { position: absolute; white-space: nowrap; text-shadow: 2px 2px 2px #000; font-weight: bold; animation: scroll linear forwards; }
+        @keyframes scroll { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }
+
+        /* 小球樣式優化 */
+        .restore-btn {
+            position: absolute; 
+            width: 50px; height: 50px;
+            background: #9147ff; border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center; 
+            cursor: grab; z-index: 101;
+            box-shadow: 0 0 15px rgba(145, 71, 255, 0.8);
+        }
+        .restore-btn:active { cursor: grabbing; }
+        .win-btn { background: transparent; border: none; color: #adadb8; cursor: pointer; padding: 4px 8px; }
+        .win-btn:hover { color: white; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <main class="controls" 
+              v-show="!isMinimized" 
+              ref="panel"
+              :style="{ left: panelPos.x + 'px', top: panelPos.y + 'px' }">
+            <div class="drag-header" @mousedown="startDrag">
+                <div style="display: flex; align-items: center; font-weight: bold;">
+                    <i class="fab fa-twitch" style="margin-right: 5px;"></i> 
+                    設置台 
+                    <span :class="['status-dot', wsStatus]"></span>
+                    <img v-if="channelAvatar" :src="channelAvatar" class="avatar-preview">
+                </div>
+                <div class="window-controls">
+                    <button @click.stop="minimizeWindow" class="win-btn"><i class="fas fa-minus"></i></button>
+                    <button @click.stop="closeWindow" class="win-btn close"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div class="control-content">
+                <div class="setting-item">
+                    <label style="font-size: 0.8em; color: #adadb8;">頻道: {{ wsStatusText }}</label>
+                    <div class="flex-row">
+                        <input v-model="channelName" placeholder="Twitch ID" @keyup.enter="connectTwitch">
+                        <button @click="connectTwitch">連線</button>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label>速度: {{ settings.speed }}s | 大小: {{ settings.fontSize }}px</label>
+                    <input type="range" v-model="settings.speed" min="3" max="15">
+                    <input type="range" v-model="settings.fontSize" min="16" max="60">
+                </div>
+                <div class="setting-item">
+                    <label>區域: {{ settings.region }}</label>
+                    <select v-model="settings.region">
+                        <option value="full">全螢幕</option>
+                        <option value="top">上半部</option>
+                        <option value="center">中間帶</option>
+                        <option value="bottom">下半部</option>
+                    </select>
+                </div>
+            </div>
+        </main>
+
+        <div v-if="isMinimized" 
+             @click="restoreWindow" 
+             @mousedown="startDrag"
+             class="restore-btn" 
+             ref="miniBtn"
+             :style="{ left: panelPos.x + 'px', top: panelPos.y + 'px' }">
+            <i class="fab fa-twitch" style="color: white; font-size: 20px;"></i>
+        </div>
+
+        <div id="danmu-layer">
+            <div v-for="msg in messages" :key="msg.id" class="danmu" :style="genDanmuStyle(msg)">
+                <span style="color:#bf94ff">{{ msg.user }}:</span>
+                <span>{{ msg.text }}</span>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

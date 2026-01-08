@@ -1,0 +1,65 @@
+/* 讓背景完全透明，不影響後方螢幕 */
+html, body {
+    margin: 0; padding: 0;
+    background-color: transparent !important; /* 只有外層透明 */
+    width: 100vw;
+    height: 100vh;
+}
+
+/* 設置窗：必須強制設定「實色」背景 */
+.controls {
+    /* 使用 16 進位確保它是實色，不要用 rgba(..., 0.x) */
+    background: #18181b !important; 
+    border: 1px solid #44444a;
+    border-radius: 12px;
+    width: 380px;
+    
+    /* 確保這層是不透明的 */
+    opacity: 1 !important; 
+    
+    /* 增加強烈的陰影，讓他在透明桌面上更有立體感 */
+    box-shadow: 0 10px 40px rgba(0,0,0,1); 
+    
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 5;
+}
+
+/* 頂部拖動區顏色也要設為實色 */
+.drag-header {
+    background: #1f1f23;
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* 這裡改成一般指針，不再拖動整個視窗 */
+    cursor: default; 
+    border-radius: 12px 12px 0 0;
+}
+
+.control-content {
+    background: #18181b; /* 內容區塊也要實色 */
+    padding: 20px;
+    border-radius: 0 0 12px 12px;
+    -webkit-app-region: no-drag;
+}
+#app {
+    width: 100vw; height: 100vh;
+}
+
+/* 最小化後的懸浮小球 */
+.restore-btn {
+    position: fixed;
+    top: 10px; left: 10px;
+    width: 40px; height: 40px;
+    background: #9147ff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 101;
+    -webkit-app-region: no-drag;
+    box-shadow: 0 0 10px rgba(145, 71, 255, 0.8);
+}
