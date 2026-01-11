@@ -1,80 +1,80 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Twitch 彈幕互動系統 - v1.2</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-</head>
-<body>
-    <div id="app">
-        <header>
-            <h1><i class="fab fa-twitch"></i> Twitch 互動彈幕控制台</h1>
-            <div :class="['status-tag', wsStatus]">
-                連線狀態: {{ wsStatusText }}
-            </div>
-        </header>
+    <!DOCTYPE html>
+    <html lang="zh-TW">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Twitch 彈幕互動系統 - v1.2</title>
+        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    </head>
+    <body>
+        <div id="app">
+            <header>
+                <h1><i class="fab fa-twitch"></i> Twitch 互動彈幕控制台</h1>
+                <div :class="['status-tag', wsStatus]">
+                    連線狀態: {{ wsStatusText }}
+                </div>
+            </header>
 
-        <main class="dashboard">
-            <section class="controls">
-                <h3><i class="fas fa-sliders-h"></i> 彈幕參數設定</h3>
-                
-                <div class="input-group">
-                    <label>頻道名稱 (Twitch ID)</label>
-                    <div class="flex-row" style="align-items: center;">
-                        <input v-model="channelName" placeholder="例如: shroud" @keyup.enter="connectTwitch">
-                        <button @click="connectTwitch" :disabled="wsStatus === 'connected'">連線</button>
-                        <img v-if="channelAvatar" :src="channelAvatar" class="avatar-preview">
+            <main class="dashboard">
+                <section class="controls">
+                    <h3><i class="fas fa-sliders-h"></i> 彈幕參數設定</h3>
+                    
+                    <div class="input-group">
+                        <label>頻道名稱 (Twitch ID)</label>
+                        <div class="flex-row" style="align-items: center;">
+                            <input v-model="channelName" placeholder="例如: shroud" @keyup.enter="connectTwitch">
+                            <button @click="connectTwitch" :disabled="wsStatus === 'connected'">連線</button>
+                            <img v-if="channelAvatar" :src="channelAvatar" class="avatar-preview">
+                        </div>
                     </div>
-                </div>
 
-                <div class="setting-item">
-                    <label><i class="fas fa-filter"></i> 關鍵字過濾 (用逗號分隔)</label>
-                    <input 
-                        v-model="filterInput" 
-                        placeholder="例如: 髒話,洗版" 
-                        @input="updateFilterList"
-                        class="modern-input"
-                    >
-                    <p class="hint">包含關鍵字的彈幕將不會顯示</p>
-                </div>
+                    <div class="setting-item">
+                        <label><i class="fas fa-filter"></i> 關鍵字過濾 (用逗號分隔)</label>
+                        <input 
+                            v-model="filterInput" 
+                            placeholder="例如: 髒話,洗版" 
+                            @input="updateFilterList"
+                            class="modern-input"
+                        >
+                        <p class="hint">包含關鍵字的彈幕將不會顯示</p>
+                    </div>
 
-                <div class="setting-item">
-                    <label>彈幕速度: {{ settings.speed }}秒</label>
-                    <input type="range" v-model="settings.speed" min="3" max="15">
-                </div>
+                    <div class="setting-item">
+                        <label>彈幕速度: {{ settings.speed }}秒</label>
+                        <input type="range" v-model="settings.speed" min="3" max="15">
+                    </div>
 
-                <div class="setting-item">
-                    <label>字體大小: {{ settings.fontSize }}px</label>
-                    <input type="range" v-model="settings.fontSize" min="16" max="60">
-                </div>
+                    <div class="setting-item">
+                        <label>字體大小: {{ settings.fontSize }}px</label>
+                        <input type="range" v-model="settings.fontSize" min="16" max="60">
+                    </div>
 
-                <div class="setting-item">
-                    <label>不透明度: {{ settings.opacity }}</label>
-                    <input type="range" v-model="settings.opacity" min="0.1" max="1" step="0.1">
-                </div>
+                    <div class="setting-item">
+                        <label>不透明度: {{ settings.opacity }}</label>
+                        <input type="range" v-model="settings.opacity" min="0.1" max="1" step="0.1">
+                    </div>
 
-                <div class="setting-item">
-                    <label>顯示區域</label>
-                    <select v-model="settings.region" class="modern-select">
-                        <option value="full">全螢幕</option>
-                        <option value="top">上半部</option>
-                        <option value="center">中間帶</option>
-                        <option value="bottom">下半部</option>
-                    </select>
-                </div>
-            </section>
-        </main>
+                    <div class="setting-item">
+                        <label>顯示區域</label>
+                        <select v-model="settings.region" class="modern-select">
+                            <option value="full">全螢幕</option>
+                            <option value="top">上半部</option>
+                            <option value="center">中間帶</option>
+                            <option value="bottom">下半部</option>
+                        </select>
+                    </div>
+                </section>
+            </main>
 
-        <div id="danmu-layer">
-            <div v-for="msg in messages" :key="msg.id" class="danmu" :style="genDanmuStyle(msg)">
-                <span class="user">{{ msg.user }}:</span>
-                <span class="text">{{ msg.text }}</span>
+            <div id="danmu-layer">
+                <div v-for="msg in messages" :key="msg.id" class="danmu" :style="genDanmuStyle(msg)">
+                    <span class="user">{{ msg.user }}:</span>
+                    <span class="text">{{ msg.text }}</span>
+                </div>
             </div>
         </div>
-    </div>
-    <script src="app.js"></script>
-</body>
-</html>
+        <script src="app.js"></script>
+    </body>
+    </html>
