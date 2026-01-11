@@ -1,6 +1,6 @@
 const { createApp } = Vue;
 
-// 1. 環境偵測與 Mock 物件
+// 1. 環境偵測
 const isElectron = navigator.userAgent.toLowerCase().includes(' electron/');
 let ipcRenderer = { 
     send: (channel, ...args) => console.log(`[Web Mode] IPC Send: ${channel}`, args) 
@@ -29,12 +29,15 @@ createApp({
             isDragging: false,
             dragOffset: { x: 0, y: 0 },
             hasMoved: false,
-            // --- 新增：過濾器相關變數 ---
+            // --- 過濾器相關 ---
             filterInput: '',
             filterList: []
         }
     },
     mounted() {
+        // 【重要】v2.1.2 優化：紀錄上一次的穿透狀態，避免重複發送
+        let lastIgnoreState = null;
+
         window.addEventListener('mousemove', (e) => {
             if (this.isDragging) {
                 this.hasMoved = true; 
@@ -55,7 +58,14 @@ createApp({
                         e.clientX >= targetRect.left && e.clientX <= targetRect.right &&
                         e.clientY >= targetRect.top && e.clientY <= targetRect.bottom
                     );
-                    ipcRenderer.send('set-ignore-mouse', !isInside);
+                    
+                    const shouldIgnore = !isInside;
+
+                    // 【核心優化】：只有狀態真正改變時才透過 IPC 發送
+                    if (shouldIgnore !== lastIgnoreState) {
+                        ipcRenderer.send('set-ignore-mouse', shouldIgnore);
+                        lastIgnoreState = shouldIgnore;
+                    }
                 }
             }
         });
@@ -72,7 +82,6 @@ createApp({
             this.dragOffset.x = e.clientX - this.panelPos.x;
             this.dragOffset.y = e.clientY - this.panelPos.y;
         },
-        // --- 新增：更新過濾清單邏輯 ---
         updateFilterList() {
             this.filterList = this.filterInput.split(',')
                 .map(s => s.trim())
@@ -107,7 +116,7 @@ createApp({
                         const user = match[1];
                         const text = match[2];
 
-                        // --- 新增：攔截過濾邏輯 ---
+                        // 過濾邏輯
                         const isBlocked = this.filterList.some(word => text.includes(word));
                         if (isBlocked) return; 
 
