@@ -41,7 +41,6 @@
         }
         .drag-header:active { cursor: grabbing; }
 
-        /* 頭像預覽樣式 */
         .avatar-preview {
             width: 24px;
             height: 24px;
@@ -64,7 +63,6 @@
         .danmu { position: absolute; white-space: nowrap; text-shadow: 2px 2px 2px #000; font-weight: bold; animation: scroll linear forwards; }
         @keyframes scroll { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }
 
-        /* 小球樣式優化 */
         .restore-btn {
             position: absolute; 
             width: 50px; height: 50px;
@@ -96,6 +94,7 @@
                     <button @click.stop="closeWindow" class="win-btn close"><i class="fas fa-times"></i></button>
                 </div>
             </div>
+
             <div class="control-content">
                 <div class="setting-item">
                     <label style="font-size: 0.8em; color: #adadb8;">頻道: {{ wsStatusText }}</label>
@@ -104,11 +103,13 @@
                         <button @click="connectTwitch">連線</button>
                     </div>
                 </div>
+
                 <div class="setting-item">
                     <label>速度: {{ settings.speed }}s | 大小: {{ settings.fontSize }}px</label>
                     <input type="range" v-model="settings.speed" min="3" max="15">
                     <input type="range" v-model="settings.fontSize" min="16" max="60">
                 </div>
+
                 <div class="setting-item">
                     <label>區域: {{ settings.region }}</label>
                     <select v-model="settings.region">
@@ -117,6 +118,18 @@
                         <option value="center">中間帶</option>
                         <option value="bottom">下半部</option>
                     </select>
+                </div>
+
+                <div class="setting-item" style="margin-top: 15px; border-top: 1px solid #303032; padding-top: 10px;">
+                    <label style="color: #bf94ff; font-size: 0.9em;"><i class="fas fa-filter"></i> 關鍵字過濾</label>
+                    <div class="flex-row">
+                        <input 
+                            v-model="filterInput" 
+                            placeholder="髒話,洗版 (用逗號隔開)" 
+                            @input="updateFilterList"
+                            style="margin-top: 5px; font-size: 0.8em; border-color: #303032;"
+                        >
+                    </div>
                 </div>
             </div>
         </main>

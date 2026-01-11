@@ -1,18 +1,25 @@
 {
   "name": "twitch-bullet-screen",
-  "version": "1.0.0",
-  "description": "",
+  "version": "2.1.0",
+  "description": "專業 Twitch 遊戲彈幕透明層工具",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JHAHQ/twitch-Bullet-screen.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "Twitch",
+    "Danmu",
+    "Electron",
+    "Overlay"
+  ],
+  "author": "JHAHQ",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
@@ -20,6 +27,24 @@
   },
   "homepage": "https://github.com/JHAHQ/twitch-Bullet-screen#readme",
   "devDependencies": {
-    "electron": "^39.2.7"
+    "electron": "^39.2.7",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.jhahq.twitchdanmu",
+    "productName": "TwitchDanmuOverlay",
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "icon": "icon.ico"
+    },
+    "files": [
+      "**/*",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "output": "dist"
+    }
   }
 }
