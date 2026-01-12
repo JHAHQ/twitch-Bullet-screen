@@ -1,0 +1,148 @@
+/* --- 基礎背景透明 --- */
+html, body {
+    margin: 0; padding: 0;
+    background-color: transparent !important;
+    width: 100vw; height: 100vh;
+    color: #efeff1;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    overflow: hidden;
+}
+
+/* --- 設置控制台本體 --- */
+.controls {
+    background: #18181b; 
+    border: 1px solid #303032;
+    border-radius: 12px;
+    width: 380px;
+    position: fixed;
+    z-index: 100;
+    box-shadow: 0 10px 50px rgba(0,0,0,0.9);
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- 頂部拖拽區 --- */
+.drag-header {
+    background: #1f1f23;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 12px 12px 0 0;
+    border-bottom: 1px solid #303032;
+    cursor: grab;
+}
+
+/* --- [重點] 乾淨的視窗按鈕 (無邊框、無背景) --- */
+.window-controls {
+    display: flex;
+    gap: 4px;
+}
+
+.win-btn {
+    /* 移除所有背景與邊框 */
+    background: transparent !important; 
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    
+    /* 樣式設定 */
+    color: #adadb8;
+    padding: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.win-btn:hover {
+    color: #ffffff; /* 懸浮變白 */
+}
+
+.win-btn.close:hover {
+    color: #ff4b4b; /* 關閉變紅 */
+}
+
+/* --- 內容與標籤 --- */
+.control-content { padding: 20px; }
+.setting-item { margin-bottom: 18px; }
+.setting-item label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.85em;
+    color: #adadb8;
+}
+
+/* --- [重點] 黑底白字輸入框 --- */
+.flex-row { display: flex; gap: 10px; align-items: center; }
+
+/* 針對 controls 內的輸入框進行專門樣式設定 */
+.controls input[type="text"], 
+.controls select {
+    background: #000000 !important; /* 強制黑底 */
+    color: #ffffff !important;      /* 強制白字 */
+    border: 1px solid #3a3a3d;
+    padding: 10px 12px;
+    border-radius: 6px;
+    width: 100%;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+    /* 移除作業系統預設外觀 */
+    -webkit-appearance: none;
+}
+
+.controls input[type="text"]:focus,
+.controls select:focus {
+    border-color: #9147ff;
+}
+
+/* --- 紫色連線按鈕 (保持原樣) --- */
+.flex-row button {
+    background: #9147ff;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.flex-row button:hover {
+    background: #772ce8;
+}
+
+/* --- 滑動條 (Range) --- */
+.controls input[type="range"] {
+    width: 100%;
+    accent-color: #9147ff;
+    background: transparent;
+    cursor: pointer;
+}
+
+/* --- 其他元件 --- */
+.status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-left: 8px; }
+.status-dot.disconnected { background: #ff4b4b; }
+.status-dot.connected { background: #00f593; box-shadow: 0 0 10px #00f593; }
+
+.avatar-preview { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #9147ff; margin-left: 8px; }
+
+/* 彈幕層 */
+#danmu-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; }
+.danmu { position: absolute; white-space: nowrap; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); font-weight: 800; animation: scroll linear forwards; }
+@keyframes scroll { from { transform: translateX(100vw); } to { transform: translateX(-110%); } }
+
+/* 恢復按鈕 */
+.restore-btn {
+    position: fixed;
+    width: 54px; height: 54px;
+    background: #9147ff;
+    border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    cursor: grab;
+    z-index: 101;
+    box-shadow: 0 4px 15px rgba(145, 71, 255, 0.6);
+}

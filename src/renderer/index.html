@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>Twitch 彈幕控制台 v2.1.4</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <div id="app">
+        <main class="controls" v-show="!isMinimized" ref="panel" :style="{ left: panelPos.x + 'px', top: panelPos.y + 'px' }">
+            <div class="drag-header" @mousedown="startDrag">
+                <div style="display: flex; align-items: center; font-weight: bold;">
+                    <i class="fab fa-twitch" style="margin-right: 5px;"></i> 
+                    設置台 <span :class="['status-dot', wsStatus]"></span>
+                    <img v-if="channelAvatar" :src="channelAvatar" class="avatar-preview">
+                </div>
+                <div class="window-controls">
+                    <button @click.stop="minimizeWindow" class="win-btn">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button @click.stop="closeWindow" class="win-btn close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="control-content">
+                <div class="setting-item">
+                    <label>頻道: {{ wsStatusText }}</label>
+                    <div class="flex-row">
+                        <input type="text" v-model="channelName" placeholder="Twitch ID" @keyup.enter="connectTwitch">
+                        <button @click="connectTwitch">連線</button>
+                    </div>
+                </div>
+                <div class="setting-item">
+                    <label>速度: {{ settings.speed }}s | 大小: {{ settings.fontSize }}px</label>
+                    <input type="range" v-model="settings.speed" min="3" max="15">
+                    <input type="range" v-model="settings.fontSize" min="16" max="60">
+                </div>
+                <div class="setting-item">
+                    <label>區域: {{ settings.region }}</label>
+                    <select v-model="settings.region">
+                        <option value="full">全螢幕</option>
+                        <option value="top">上半部</option>
+                        <option value="center">中間帶</option>
+                        <option value="bottom">下半部</option>
+                    </select>
+                </div>
+                <div class="setting-item" style="margin-top: 15px; border-top: 1px solid #303032; padding-top: 10px;">
+                    <label style="color: #bf94ff;"><i class="fas fa-filter"></i> 關鍵字過濾</label>
+                    <div class="flex-row">
+                        <input type="text" v-model="filterInput" placeholder="髒話,洗版 (用逗號隔開)" @input="updateFilterList">
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div v-if="isMinimized" @click="restoreWindow" @mousedown="startDrag" class="restore-btn" ref="miniBtn" :style="{ left: panelPos.x + 'px', top: panelPos.y + 'px' }">
+            <i class="fab fa-twitch" style="color: white; font-size: 20px;"></i>
+        </div>
+
+        <div id="danmu-layer">
+            <div v-for="msg in messages" :key="msg.id" class="danmu" :style="genDanmuStyle(msg)">
+                <span style="color:#bf94ff">{{ msg.user }}:</span>
+                <span>{{ msg.text }}</span>
+            </div>
+        </div>
+    </div>
+    <script src="js/app.js"></script>
+</body>
+</html>
