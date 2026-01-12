@@ -19,6 +19,7 @@ html, body {
     box-shadow: 0 10px 50px rgba(0,0,0,0.9);
     display: flex;
     flex-direction: column;
+    overflow: hidden; /* 確保內容不超出圓角 */
 }
 
 /* --- 頂部拖拽區 --- */
@@ -28,44 +29,108 @@ html, body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-radius: 12px 12px 0 0;
     border-bottom: 1px solid #303032;
     cursor: grab;
 }
 
-/* --- [重點] 乾淨的視窗按鈕 (無邊框、無背景) --- */
+/* --- 視窗按鈕與齒輪 --- */
 .window-controls {
     display: flex;
     gap: 4px;
 }
 
 .win-btn {
-    /* 移除所有背景與邊框 */
     background: transparent !important; 
     border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-    
-    /* 樣式設定 */
     color: #adadb8;
     padding: 8px;
     cursor: pointer;
     font-size: 14px;
-    transition: color 0.2s;
+    transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.win-btn:hover {
-    color: #ffffff; /* 懸浮變白 */
+.win-btn:hover { color: #ffffff; }
+.win-btn.active { color: #9147ff; transform: rotate(45deg); }
+.win-btn.close:hover { color: #ff4b4b; }
+
+/* --- [重點] 設置窗覆蓋層 (Overlay) --- */
+.settings-overlay {
+    position: absolute;
+    top: 45px; /* header 的高度 */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #18181b;
+    z-index: 10;
+    display: flex;
+    animation: fadeIn 0.2s ease-out;
 }
 
-.win-btn.close:hover {
-    color: #ff4b4b; /* 關閉變紅 */
+/* 左側邊欄圖示區 */
+.settings-sidebar {
+    width: 50px;
+    background: #1f1f23;
+    border-right: 1px solid #303032;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 15px;
 }
 
-/* --- 內容與標籤 --- */
+.sidebar-item {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #adadb8;
+    transition: all 0.2s;
+}
+
+.sidebar-item:hover { background: #26262c; color: white; }
+.sidebar-item.active { background: #9147ff; color: white; }
+
+/* 右側主內容區 */
+.settings-main {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.tab-title {
+    display: block;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #9147ff;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+}
+
+/* 語言選項列 (勾選式) */
+.lang-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #000000;
+    border: 1px solid #3a3a3d;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.lang-option:hover { border-color: #5b5b5e; }
+.lang-text { font-size: 14px; }
+.check-mark { color: #00f593; font-size: 14px; }
+
+/* --- 原始內容樣式 --- */
 .control-content { padding: 20px; }
 .setting-item { margin-bottom: 18px; }
 .setting-item label {
@@ -75,10 +140,7 @@ html, body {
     color: #adadb8;
 }
 
-/* --- [重點] 黑底白字輸入框 --- */
-.flex-row { display: flex; gap: 10px; align-items: center; }
-
-/* 針對 controls 內的輸入框進行專門樣式設定 */
+/* 輸入框樣式 */
 .controls input[type="text"], 
 .controls select {
     background: #000000;
@@ -89,11 +151,8 @@ html, body {
     width: 100%;
     outline: none;
     box-sizing: border-box;
-    transition: border-color 0.2s;
-
-    /* 修正警告：同時定義標準與供應商前綴 */
-    -webkit-appearance: none; /* 針對 Electron/Chrome */
-    appearance: none;         /* 標準屬性 */
+    -webkit-appearance: none;
+    appearance: none;
 }
 
 .controls input[type="text"]:focus,
@@ -101,7 +160,7 @@ html, body {
     border-color: #9147ff;
 }
 
-/* --- 紫色連線按鈕 (保持原樣) --- */
+.flex-row { display: flex; gap: 10px; align-items: center; }
 .flex-row button {
     background: #9147ff;
     color: white;
@@ -113,31 +172,13 @@ html, body {
     white-space: nowrap;
 }
 
-.flex-row button:hover {
-    background: #772ce8;
-}
-
-/* --- 滑動條 (Range) --- */
-.controls input[type="range"] {
-    width: 100%;
-    accent-color: #9147ff;
-    background: transparent;
-    cursor: pointer;
-}
-
-/* --- 其他元件 --- */
+/* 其他組件樣式 */
 .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-left: 8px; }
 .status-dot.disconnected { background: #ff4b4b; }
 .status-dot.connected { background: #00f593; box-shadow: 0 0 10px #00f593; }
-
 .avatar-preview { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #9147ff; margin-left: 8px; }
 
-/* 彈幕層 */
-#danmu-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; }
-.danmu { position: absolute; white-space: nowrap; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); font-weight: 800; animation: scroll linear forwards; }
-@keyframes scroll { from { transform: translateX(100vw); } to { transform: translateX(-110%); } }
-
-/* 恢復按鈕 */
+/* 恢復按鈕 (最小化後) */
 .restore-btn {
     position: fixed;
     width: 54px; height: 54px;
@@ -146,5 +187,14 @@ html, body {
     display: flex; justify-content: center; align-items: center;
     cursor: grab;
     z-index: 101;
-    box-shadow: 0 4px 15px rgba(145, 71, 255, 0.6);
 }
+
+/* 動畫與彈幕 */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+.slide-fade-enter-active { transition: all 0.2s ease-out; }
+.slide-fade-leave-active { transition: all 0.1s ease-in; }
+.slide-fade-enter-from, .slide-fade-leave-to { opacity: 0; transform: translateY(-10px); }
+
+#danmu-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; }
+.danmu { position: absolute; white-space: nowrap; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); font-weight: 800; animation: scroll linear forwards; }
+@keyframes scroll { from { transform: translateX(100vw); } to { transform: translateX(-110%); } }

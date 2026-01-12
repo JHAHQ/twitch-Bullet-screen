@@ -1,7 +1,7 @@
 {
   "name": "twitch-bullet-screen",
-  "version": "2.1.4",
-  "description": "Twitch 彈幕工具",
+  "version": "2.2.0",
+  "description": "Twitch 彈幕工具 - 多國語言支援版",
   "main": "src/main/main.js",
   "scripts": {
     "start": "electron .",
@@ -10,9 +10,9 @@
   "author": "JHAHQ",
   "license": "CC-BY-NC-SA-4.0",
   "devDependencies": {
-    "electron": "^28.0.0"
+    "electron": "^28.0.0",
+    "electron-builder": "^26.4.0"
   },
-  "dependencies": {},
   "build": {
     "appId": "com.jhahq.twitchdanmu",
     "productName": "Twitch彈幕控制台",
@@ -20,7 +20,7 @@
       "output": "dist"
     },
     "win": {
-      "target": "portable",
+      "target": ["portable"],
       "icon": "icon.ico"
     }
   }
