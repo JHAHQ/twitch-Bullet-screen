@@ -1,31 +1,53 @@
-## ⚖️ 版權聲明 (License)
+# 💜 Twitch Danmu Controller (彈幕控制台) v2.2.0
 
-本專案採用 **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International** (CC BY-NC-SA 4.0) 授權。
+[繁體中文] | [English]
 
-- **姓名標示 (BY)**：您必須指名作者為 `JHAHQ` 並提供原專案連結。
-- **非商業性 (NC)**：您不得將本程式或其源代碼用於任何商業盈利目的（包括但不限於換皮出售、付費下載）。
-- **相同方式分享 (SA)**：若您修改本程式，必須以相同的授權方式開放源代碼。
+---
 
-**嚴禁未經授權將本程式封裝為商業軟體進行非法牟利。**
+## 🇹🇼 繁體中文說明
 
-# Twitch 彈幕控制台 v2.1.3 (Transparency Edition)
+這是一個為 Twitch 實況主打造的輕量化彈幕工具。透過 Electron 技術，將聊天室訊息以透明疊層（Overlay）顯示在螢幕最前方，讓你在全螢幕遊戲時也能即時互動。
 
-這是一個基於 Electron 開發的桌面彈幕工具，支援背景透明化、滑鼠穿透以及置頂顯示。
-## 🚀 如何在網站運行
+### ✨ v2.2.0 更新重點
+- **深色介面優化**：採用專業深色模式 (Dark Mode)，提升長時間實況的視覺舒適度。
+- **全新設置系統**：位於主視窗右上角的齒輪按鈕，點擊後開啟側邊欄設置選單。
+- **多語系支援**：內建繁體中文、英文、日文切換功能。
+- **效能提升**：優化過濾器邏輯，減少高流量聊天室時的記憶體佔用。
 
-使用(https://jhahq.github.io/twitch-Bullet-screen/)
+### 🚀 如何使用
+1. 前往 [Releases](你的GitHub網址/releases) 下載 `Twitch彈幕控制台.exe`。
+2. 程式為 **免安裝版**，下載後直接執行即可。
+3. 輸入您的 Twitch 頻道 ID（ID 為 URL 後方的名稱）。
+4. 點擊連線，即可在螢幕上看到彈幕飄過。
 
-## 🚀 如何在本地運行
+---
 
-由於 v2.0 採用桌面端架構，請依照以下步驟操作：
+## 🇺🇸 English Description
 
-1. **安裝 Node.js**: 請先至 [nodejs.org](https://nodejs.org/) 下載並安裝穩定版。
-2. **複製專案**: 下載此tag檔案到你的電腦解壓縮。
-3. **安裝依賴套件**:
-   在專案資料夾內開啟終端機 (CMD 或 PowerShell)，輸入：
-   ```bash
-   npm install
-3. **如何使用程式**:
-在終端機中使用下列指令
-   ```bash
-   npm start
+A lightweight Twitch chat overlay tool designed for streamers. Powered by Electron, it displays chat messages as a transparent overlay on top of any application, ensuring you never miss a message while gaming in full screen.
+
+### ✨ v2.2.0 Key Updates
+- **Dark Mode UI**: Professional dark theme optimized for reduced eye strain during long streaming sessions.
+- **New Settings System**: Access settings via the gear icon in the top-right corner with a sleek sidebar overlay.
+- **Multi-language Support**: Built-in support for Traditional Chinese, English, and Japanese.
+- **Performance Boost**: Refined filter logic for lower memory usage in high-traffic chatrooms.
+
+### 🚀 How to Use
+1. Download the `Twitch彈幕控制台.exe` from the [Releases](你的GitHub網址/releases) page.
+2. **Portable version**: No installation required. Just run the executable.
+3. Enter your **Twitch Channel ID** (the name at the end of your channel URL).
+4. Click "Connect" to start seeing chat messages float across your screen.
+
+---
+
+## ⌨️ 開發與編譯 / Development
+
+```bash
+# Clone repository
+git clone [https://github.com/你的用戶名/twitch-Bullet-screen.git](https://github.com/你的用戶名/twitch-Bullet-screen.git)
+
+# Install dependencies
+npm install
+
+# Build EXE
+npx electron-builder build --win portable
