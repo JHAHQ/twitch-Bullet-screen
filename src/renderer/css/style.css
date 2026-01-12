@@ -81,17 +81,19 @@ html, body {
 /* 針對 controls 內的輸入框進行專門樣式設定 */
 .controls input[type="text"], 
 .controls select {
-    background: #000000 !important; /* 強制黑底 */
-    color: #ffffff !important;      /* 強制白字 */
-    border: 1px solid #3a3a3d;
+    background: #000000;
+    color: #ffffff;
+    border: 2px solid #3a3a3d;
     padding: 10px 12px;
     border-radius: 6px;
     width: 100%;
     outline: none;
     box-sizing: border-box;
     transition: border-color 0.2s;
-    /* 移除作業系統預設外觀 */
-    -webkit-appearance: none;
+
+    /* 修正警告：同時定義標準與供應商前綴 */
+    -webkit-appearance: none; /* 針對 Electron/Chrome */
+    appearance: none;         /* 標準屬性 */
 }
 
 .controls input[type="text"]:focus,
