@@ -1,7 +1,7 @@
 {
   "name": "twitch-bullet-screen",
-  "version": "2.1.0",
-  "description": "專業 Twitch 遊戲彈幕透明層工具",
+  "version": "2.1.3",
+  "description": "Twitch彈幕工具",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
