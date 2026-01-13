@@ -15,7 +15,7 @@
   },
   "build": {
     "appId": "com.jhahq.twitchdanmu",
-    "productName": "彈幕控制器",
+    "productName": "彈幕工具",
     "directories": {
       "output": "dist"
     },
