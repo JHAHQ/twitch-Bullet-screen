@@ -1,0 +1,23 @@
+type,key,value
+ui,panelTitle,Controlador Twitch Danmu
+ui,language,Idioma
+ui,channel,Conexão
+ui,placeholderID,Twitch ID...
+ui,connect,Conectar
+ui,speed,Velocidade
+ui,fontSize,Tamanho da fonte
+ui,region,Região
+ui,filter,Filtro
+ui,placeholderFilter,Separado por vírgula...
+ui,density,Densidade
+ui,systemTab,Sistema
+ui,fpsLimit,Limite FPS
+ui,unlimited,Ilimitado
+ui,miniSize,Tamanho da bola
+regions,full,Tela cheia
+regions,top,Superior
+regions,center,Centro
+regions,bottom,Inferior
+status,connected,Conectado
+status,disconnected,Desconectado
+status,connecting,Conectando...

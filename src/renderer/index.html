@@ -2,13 +2,13 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>Twitch 彈幕控制台 v2.2.0</title>
+    <title>Twitch Danmu Controller v2.3.1</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
-    <div id="app">
+    <div id="app" :style="systemVars">
         <main class="controls" v-show="!isMinimized" ref="panel" :style="{ left: panelPos.x + 'px', top: panelPos.y + 'px' }">
             <div class="drag-header" @mousedown="startDrag">
                 <div style="display: flex; align-items: center; font-weight: bold;">
@@ -37,6 +37,9 @@
                             <div class="sidebar-item" :class="{ active: currentTab === 'lang' }" @click="currentTab = 'lang'">
                                 <i class="fas fa-globe"></i>
                             </div>
+                            <div class="sidebar-item" :class="{ active: currentTab === 'system' }" @click="currentTab = 'system'">
+                                <i class="fas fa-microchip"></i>
+                            </div>
                             <div class="sidebar-item" :class="{ active: currentTab === 'about' }" @click="currentTab = 'about'">
                                 <i class="fas fa-info-circle"></i>
                             </div>
@@ -49,6 +52,23 @@
                                     <i v-show="settings.lang === code" class="fas fa-check check-mark"></i>
                                 </div>
                             </div>
+                            <div v-if="currentTab === 'system'" class="tab-content">
+                                <label class="tab-title">{{ t.ui.systemTab }}</label>
+                                
+                                <div class="setting-item">
+                                    <label>{{ t.ui.fpsLimit }} (0 = {{ t.ui.unlimited }})</label>
+                                    <div class="flex-row">
+                                        <input type="range" v-model.number="settings.fpsLimit" min="0" max="270" step="1">
+                                        <input type="number" v-model.number="settings.fpsLimit" class="num-input">
+                                    </div>
+                                </div>
+
+                                <div class="setting-item">
+                                    <label>{{ t.ui.miniSize }}: {{ settings.miniSize }}px</label>
+                                    <input type="range" v-model.number="settings.miniSize" min="30" max="100" step="2">
+                                </div>
+                            </div>
+
                             <div v-if="currentTab === 'about'" class="tab-content">
                                 <label class="tab-title">About</label>
                                 <div class="about-info">
@@ -75,32 +95,37 @@
                 </div>
 
                 <div class="setting-item">
+                    <label><i class="fas fa-layer-group"></i> {{ t.ui.density }}: {{ settings.density }}%</label>
+                    <input type="range" v-model="settings.density" min="10" max="100" step="10">
+                </div>
+
+                <div class="setting-item">
                     <label>{{ t.ui.region }}: {{ t.regions[settings.region] }}</label>
                     <select v-model="settings.region">
-                        <option value="full">{{ t.regions.full }}</option>
-                        <option value="top">{{ t.regions.top }}</option>
-                        <option value="center">{{ t.regions.center }}</option>
-                        <option value="bottom">{{ t.regions.bottom }}</option>
+                        <option v-for="(val, key) in t.regions" :key="key" :value="key">{{ val }}</option>
                     </select>
                 </div>
 
-                <div class="setting-item" style="margin-top: 15px; border-top: 1px solid #303032; padding-top: 10px;">
-                    <label style="color: #bf94ff;"><i class="fas fa-filter"></i> {{ t.ui.filter }}</label>
-                    <div class="flex-row">
-                        <input type="text" v-model="filterInput" :placeholder="t.ui.placeholderFilter" @input="updateFilterList">
-                    </div>
+                <div class="setting-item">
+                    <label><i class="fas fa-filter"></i> {{ t.ui.filter }}</label>
+                    <input type="text" v-model="filterInput" :placeholder="t.ui.placeholderFilter" @input="updateFilterList">
                 </div>
             </div>
         </main>
 
-        <div v-if="isMinimized" @click="restoreWindow" @mousedown="startDrag" class="restore-btn" ref="miniBtn" :style="{ left: panelPos.x + 'px', top: panelPos.y + 'px' }">
-            <i class="fab fa-twitch" style="color: white; font-size: 20px;"></i>
+        <div v-if="isMinimized" 
+             @click="restoreWindow" 
+             @mousedown="startDrag" 
+             class="restore-btn" 
+             ref="miniBtn" 
+             :style="miniStyle">
+            <i class="fab fa-twitch" :style="{ fontSize: (settings.miniSize * 0.4) + 'px' }"></i>
         </div>
 
         <div id="danmu-layer">
             <div v-for="msg in messages" :key="msg.id" class="danmu" :style="genDanmuStyle(msg)">
-                <span style="color:#bf94ff">{{ msg.user }}:</span>
-                <span>{{ msg.text }}</span>
+                <span class="user-name">{{ msg.user }}:</span>
+                <span class="msg-text">{{ msg.text }}</span>
             </div>
         </div>
     </div>

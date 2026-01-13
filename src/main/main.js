@@ -1,6 +1,10 @@
 const { app, BrowserWindow, ipcMain, screen } = require('electron');
 const path = require('path');
 
+// 禁用硬體加速黑名單以確保效能
+app.commandLine.appendSwitch('disable-gpu-vsync');
+app.commandLine.appendSwitch('enable-gpu-rasterization');
+
 let win;
 
 function createWindow() {
@@ -8,7 +12,7 @@ function createWindow() {
     const { width, height } = primaryDisplay.workAreaSize;
 
     win = new BrowserWindow({
-        title: "Twitch Danmu Controller v2.2.0", // 更新版本號
+        title: "Twitch Danmu Controller v2.3.0",
         width: width,
         height: height,
         x: 0, y: 0,
@@ -22,36 +26,33 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false, 
-            backgroundThrottling: false
+            backgroundThrottling: false, // 關鍵：防止視窗失去焦點時彈幕卡頓
+            offscreen: false
         }
     });
 
-    // 確保在全螢幕遊戲或影片上也能看見
     win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
     win.setAlwaysOnTop(true, 'screen-saver');
 
-    // 載入我們剛剛改好的 index.html
     win.loadFile(path.join(__dirname, '../renderer/index.html'));
 
-    // 滑鼠穿透控制：當滑鼠在設定面板之外時，允許點擊後方視窗
+    win.webContents.on('did-finish-load', () => {
+        const sysLang = app.getLocale().toLowerCase();
+        win.webContents.send('init-lang', sysLang);
+    });
+
     ipcMain.on('set-ignore-mouse', (event, ignore) => {
-        if (win) {
+        if (win && !win.isDestroyed()) {
             win.setIgnoreMouseEvents(ignore, { forward: true });
         }
     });
 
-    // 視窗關閉事件
-    ipcMain.on('window-close', () => {
-        app.quit();
-    });
+    ipcMain.on('window-close', () => app.quit());
+    ipcMain.on('window-minimize', () => win.minimize());
 }
 
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => { 
     if (process.platform !== 'darwin') app.quit(); 
-});
-
-app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });

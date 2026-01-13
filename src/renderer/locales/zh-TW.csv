@@ -1,0 +1,23 @@
+type,key,value
+ui,panelTitle,Twitch 彈幕控制台
+ui,language,語言設定
+ui,channel,頻道連線
+ui,placeholderID,輸入 Twitch ID...
+ui,connect,連線
+ui,speed,飄過速度
+ui,fontSize,字體大小
+ui,region,顯示區域
+ui,filter,過濾關鍵字
+ui,placeholderFilter,用逗號分隔關鍵字...
+ui,density,彈幕密度
+ui,systemTab,系統效能
+ui,fpsLimit,幀數限制
+ui,unlimited,無限制
+ui,miniSize,最小化球體大小
+regions,full,全螢幕
+regions,top,上半部
+regions,center,正中間
+regions,bottom,下半部
+status,connected,已連線
+status,disconnected,未連線
+status,connecting,連線中...

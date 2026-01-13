@@ -1,0 +1,23 @@
+type,key,value
+ui,panelTitle,Twitch 단막 컨트롤러
+ui,language,언어 설정
+ui,channel,채널 연결
+ui,placeholderID,Twitch ID 입력...
+ui,connect,연결
+ui,speed,흐름 속도
+ui,fontSize,글꼴 크기
+ui,region,표시 지역
+ui,filter,필터 키워드
+ui,placeholderFilter,쉼표로 구분...
+ui,density,밀도
+ui,systemTab,시스템
+ui,fpsLimit,프레임 제한
+ui,unlimited,무제한
+ui,miniSize,버튼 크기
+regions,full,전체 화면
+regions,top,상단
+regions,center,중앙
+regions,bottom,하단
+status,connected,연결됨
+status,disconnected,오프라인
+status,connecting,연결 중...
