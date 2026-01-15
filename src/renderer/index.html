@@ -12,7 +12,7 @@
         <main class="controls" v-show="!isMinimized" ref="panel" :style="{ left: panelPos.x + 'px', top: panelPos.y + 'px' }">
             <div class="drag-header" @mousedown="startDrag">
                 <div style="display: flex; align-items: center; font-weight: bold;">
-                    <i class="fab fa-twitch" style="margin-right: 5px; color: #9147ff;"></i> 
+                    <i class="fab fa-twitch" style="margin-right: 8px; color: #9147ff;"></i> 
                     {{ t.ui.panelTitle }} <span :class="['status-dot', wsStatus]"></span>
                     <img v-if="channelAvatar" :src="channelAvatar" class="avatar-preview">
                 </div>
@@ -28,75 +28,77 @@
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-            </div>
+            </div> 
 
-            <div class="control-content">
-                <transition name="slide-fade">
-                    <div v-if="showSettings" class="settings-overlay" @mousedown.stop>
-                        <div class="settings-sidebar">
-                            <div class="sidebar-item" :class="{ active: currentTab === 'lang' }" @click="currentTab = 'lang'">
-                                <i class="fas fa-globe"></i>
-                            </div>
-                            <div class="sidebar-item" :class="{ active: currentTab === 'system' }" @click="currentTab = 'system'">
-                                <i class="fas fa-microchip"></i>
-                            </div>
-                            <div class="sidebar-item" :class="{ active: currentTab === 'about' }" @click="currentTab = 'about'">
-                                <i class="fas fa-info-circle"></i>
+            <transition name="slide-fade">
+                <div v-if="showSettings" class="settings-overlay" @mousedown.stop>
+                    <div class="settings-sidebar">
+                        <div class="sidebar-item" :class="{ active: currentTab === 'lang' }" @click="currentTab = 'lang'">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <div class="sidebar-item" :class="{ active: currentTab === 'system' }" @click="currentTab = 'system'">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                        <div class="sidebar-item" :class="{ active: currentTab === 'about' }" @click="currentTab = 'about'">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-main">
+                        <div v-if="currentTab === 'lang'" class="tab-content">
+                            <label class="tab-title">{{ t.ui.language }}</label>
+                            <div class="lang-option" v-for="(name, code) in langNames" :key="code" @click="settings.lang = code">
+                                <span class="lang-text">{{ name }}</span>
+                                <i v-show="settings.lang === code" class="fas fa-check check-mark"></i>
                             </div>
                         </div>
-                        <div class="settings-main">
-                            <div v-if="currentTab === 'lang'" class="tab-content">
-                                <label class="tab-title">{{ t.ui.language }}</label>
-                                <div class="lang-option" v-for="(name, code) in langNames" :key="code" @click="settings.lang = code">
-                                    <span class="lang-text">{{ name }}</span>
-                                    <i v-show="settings.lang === code" class="fas fa-check check-mark"></i>
+
+                        <div v-if="currentTab === 'system'" class="tab-content">
+                            <label class="tab-title">{{ t.ui.systemTab }}</label>
+                            <div class="setting-item">
+                                <label>{{ t.ui.fpsLimit }} (0 = {{ t.ui.unlimited }})</label>
+                                <div class="flex-row">
+                                    <input type="range" v-model.number="settings.fpsLimit" min="0" max="270" step="1">
+                                    <input type="number" v-model.number="settings.fpsLimit" class="num-input">
                                 </div>
                             </div>
-                            <div v-if="currentTab === 'system'" class="tab-content">
-                                <label class="tab-title">{{ t.ui.systemTab }}</label>
-                                
-                                <div class="setting-item">
-                                    <label>{{ t.ui.fpsLimit }} (0 = {{ t.ui.unlimited }})</label>
-                                    <div class="flex-row">
-                                        <input type="range" v-model.number="settings.fpsLimit" min="0" max="270" step="1">
-                                        <input type="number" v-model.number="settings.fpsLimit" class="num-input">
-                                    </div>
-                                </div>
-
-                                <div class="setting-item">
-                                    <label>{{ t.ui.miniSize }}: {{ settings.miniSize }}px</label>
-                                    <input type="range" v-model.number="settings.miniSize" min="30" max="100" step="2">
-                                </div>
+                            <div class="setting-item">
+                                <label>{{ t.ui.miniSize }}: {{ settings.miniSize }}px</label>
+                                <input type="range" v-model.number="settings.miniSize" min="30" max="100" step="2">
                             </div>
+                        </div>
 
-                            <div v-if="currentTab === 'about'" class="tab-content">
-                                <label class="tab-title">About</label>
-                                <div class="about-info">
-                                    <p>Version: {{ version }}</p>
-                                    <p>© 2026 {{ author }}</p>
-                                </div>
+                        <div v-if="currentTab === 'about'" class="tab-content">
+                            <label class="tab-title">About</label>
+                            <div class="about-info">
+                                <p>Version: {{ version }}</p>
+                                <p>© 2026 {{ author }}</p>
                             </div>
                         </div>
                     </div>
-                </transition>
+                </div>
+            </transition>
 
+            <div class="control-content">
                 <div class="setting-item">
                     <label>{{ t.ui.channel }}: {{ wsStatusText }}</label>
                     <div class="flex-row">
                         <input type="text" v-model="channelName" :placeholder="t.ui.placeholderID" @keyup.enter="connectTwitch">
-                        <button @click="connectTwitch">{{ t.ui.connect }}</button>
+                        <button class="connect-btn" @click="connectTwitch">{{ t.ui.connect }}</button>
                     </div>
                 </div>
 
                 <div class="setting-item">
                     <label>{{ t.ui.speed }}: {{ settings.speed }}s | {{ t.ui.fontSize }}: {{ settings.fontSize }}px</label>
-                    <input type="range" v-model="settings.speed" min="3" max="15">
-                    <input type="range" v-model="settings.fontSize" min="16" max="60">
+                    <div class="flex-row">
+                        <input type="range" v-model.number="settings.speed" min="3" max="15">
+                        <input type="range" v-model.number="settings.fontSize" min="16" max="60">
+                    </div>
                 </div>
 
                 <div class="setting-item">
                     <label><i class="fas fa-layer-group"></i> {{ t.ui.density }}: {{ settings.density }}%</label>
-                    <input type="range" v-model="settings.density" min="10" max="100" step="10">
+                    <input type="range" v-model.number="settings.density" min="10" max="100" step="10">
                 </div>
 
                 <div class="setting-item">
@@ -114,8 +116,8 @@
         </main>
 
         <div v-if="isMinimized" 
-             @click="restoreWindow" 
              @mousedown="startDrag" 
+             @click="restoreWindow" 
              class="restore-btn" 
              ref="miniBtn" 
              :style="miniStyle">

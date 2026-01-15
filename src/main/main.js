@@ -12,7 +12,7 @@ function createWindow() {
     const { width, height } = primaryDisplay.workAreaSize;
 
     win = new BrowserWindow({
-        title: "Twitch Danmu Controller v2.3.0",
+        title: "Twitch Danmu Controller v2.3.1",
         width: width,
         height: height,
         x: 0, y: 0,
