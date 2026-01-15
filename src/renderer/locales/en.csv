@@ -1,0 +1,23 @@
+type,key,value
+ui,panelTitle,youtube Danmu Controller
+ui,language,Language
+ui,channel,Channel Connection
+ui,placeholderID,youtube ID...
+ui,connect,Connect
+ui,speed,Speed
+ui,fontSize,Font Size
+ui,region,Display Region
+ui,filter,Keyword Filter
+ui,placeholderFilter,Keywords split by comma...
+ui,density,Density
+ui,systemTab,System
+ui,fpsLimit,FPS Limit
+ui,unlimited,Unlimited
+ui,miniSize,Mini Ball Size
+regions,full,Full Screen
+regions,top,Top
+regions,center,Center
+regions,bottom,Bottom
+status,connected,Connected
+status,disconnected,Offline
+status,connecting,Connecting...

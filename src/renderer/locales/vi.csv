@@ -1,0 +1,23 @@
+type,key,value
+ui,panelTitle,Điều khiển youtube Danmu
+ui,language,Ngôn ngữ
+ui,channel,Kết nối kênh
+ui,placeholderID,youtube ID...
+ui,connect,Kết nối
+ui,speed,Tốc độ
+ui,fontSize,Cỡ chữ
+ui,region,Khu vực
+ui,filter,Lọc từ khóa
+ui,placeholderFilter,Cách nhau bằng dấu phẩy...
+ui,density,Mật độ
+ui,systemTab,Hệ thống
+ui,fpsLimit,Giới hạn FPS
+ui,unlimited,Không giới hạn
+ui,miniSize,Kích thước bóng
+regions,full,Toàn màn hình
+regions,top,Phía trên
+regions,center,Chính giữa
+regions,bottom,Phía dưới
+status,connected,Đã kết nối
+status,disconnected,Ngoại tuyến
+status,connecting,Đang kết nối...

@@ -1,0 +1,23 @@
+type,key,value
+ui,panelTitle,youtube コメントコントローラー
+ui,language,言語設定
+ui,channel,チャンネル接続
+ui,placeholderID,youtube IDを入力...
+ui,connect,接続
+ui,speed,流れる速度
+ui,fontSize,フォントサイズ
+ui,region,表示領域
+ui,filter,フィルター
+ui,placeholderFilter,カンマで区切る...
+ui,density,密度
+ui,systemTab,システム
+ui,fpsLimit,フレームレート制限
+ui,unlimited,無制限
+ui,miniSize,ボタンのサイズ
+regions,full,フルスクリーン
+regions,top,上部
+regions,center,中央
+regions,bottom,下部
+status,connected,接続済み
+status,disconnected,オフライン
+status,connecting,接続中...

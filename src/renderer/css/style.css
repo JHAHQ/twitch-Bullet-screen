@@ -1,0 +1,196 @@
+/**
+ * YouTube Danmu Controller v1.0.0
+ * CSS - Fixed Language Layout
+ */
+
+/* --- 基礎背景透明與效能優化 --- */
+html, body {
+    margin: 0; padding: 0;
+    background-color: transparent !important;
+    width: 100vw; height: 100vh;
+    color: #efeff1;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    overflow: hidden;
+    contain: content;
+}
+
+/* --- 主控制面板 --- */
+.controls {
+    background: rgba(24, 24, 27, 0.85); /* 半透明深色 */
+    backdrop-filter: blur(12px);         /* 磨砂玻璃效果 */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    width: 380px;
+    position: fixed;
+    z-index: 100;
+    box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* --- 拖拽頂部 --- */
+.drag-header {
+    background: rgba(31, 31, 35, 0.6); /* 頂部標題列也微透明 */
+    /* 其他屬性保持不變 */
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: grab;
+    user-select: none;
+    height: 48px;
+    box-sizing: border-box;
+}
+
+.window-controls { display: flex; gap: 4px; }
+
+.win-btn {
+    background: transparent !important; 
+    border: none !important;
+    color: #adadb8;
+    padding: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+}
+
+.win-btn:hover { color: #ffffff; }
+.win-btn.active { color: #ff4b4b; transform: rotate(45deg); }
+.win-btn.close:hover { color: #ff4b4b; }
+
+/* --- 設定遮蓋層 --- */
+.settings-overlay {
+    position: absolute;
+    top: 48px;
+    left: 0; right: 0; bottom: 0;
+    background: rgba(24, 24, 27, 0.9); /* 設定層稍微加深以利閱讀 */
+    backdrop-filter: blur(10px);
+    z-index: 10;
+    display: flex;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.settings-sidebar {
+    width: 50px;
+    background: #1f1f23;
+    border-right: 1px solid #303032;
+    display: flex; flex-direction: column; align-items: center; padding-top: 15px;
+}
+
+.sidebar-item {
+    width: 34px; height: 34px;
+    display: flex; justify-content: center; align-items: center;
+    margin-bottom: 12px; border-radius: 6px;
+    cursor: pointer; color: #adadb8; transition: all 0.2s;
+}
+.sidebar-item.active { background: #ff4b4b; color: white; }
+
+.settings-main { flex: 1; padding: 20px; overflow-y: auto; }
+.tab-title { display: block; font-size: 0.8em; font-weight: bold; color: #ff4b4b; margin-bottom: 15px; text-transform: uppercase; }
+
+/* --- 語言選項格式 (修正重點) --- */
+.lang-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    background: #000000;
+    border: 2px solid #3a3a3d;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.lang-option:hover { border-color: #ff4b4b; }
+.lang-text { font-size: 0.9em; font-weight: 500; }
+.check-mark { color: #ff4b4b; font-size: 14px; }
+
+/* --- 表單控制與滑條樣式 --- */
+.control-content { padding: 20px; }
+.setting-item { margin-bottom: 18px; }
+.setting-item label { display: block; margin-bottom: 8px; font-size: 0.85em; color: #adadb8; }
+
+.flex-row { display: flex; gap: 10px; align-items: center; }
+
+input[type="range"] {
+    flex: 1;
+    cursor: pointer;
+    accent-color: #ff4b4b;
+}
+
+.num-input {
+    width: 65px !important;
+    text-align: center;
+    padding: 5px !important;
+    background: #000000 !important;
+    border: 2px solid #3a3a3d !important;
+    border-radius: 6px;
+    color: #ff4b4b;
+    font-weight: bold;
+    outline: none;
+}
+.num-input:focus { border-color: #ff4b4b; }
+
+.controls input[type="text"], 
+.controls select {
+    background: #000000; color: #ffffff;
+    border: 2px solid #3a3a3d; padding: 10px 12px;
+    border-radius: 6px; width: 100%; outline: none;
+    box-sizing: border-box;
+}
+
+.flex-row button {
+    background: #ff4b4b; color: white; border: none;
+    padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold;
+}
+
+/* --- 彈幕層與 GPU 優化 --- */
+#danmu-layer {
+    position: fixed; top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    pointer-events: none;
+    transform: translateZ(0);
+}
+
+.danmu {
+    position: absolute;
+    white-space: nowrap;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+    font-weight: 800;
+    color: #ffffff;
+    will-change: transform;
+    animation: scroll linear forwards;
+}
+
+.user-name { color: #ff4b4b; margin-right: 8px; }
+
+@keyframes scroll {
+    from { transform: translateX(100vw) translateZ(0); }
+    to { transform: translateX(-120%) translateZ(0); }
+}
+
+/* --- 其他狀態組件 --- */
+.status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-left: 8px; }
+.status-dot.disconnected { background: #ff4b4b; }
+.status-dot.connected { background: #00f593; box-shadow: 0 0 8px #00f593; }
+.avatar-preview { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ff4b4b; margin-left: 8px; }
+
+.restore-btn {
+    position: fixed;
+    background: #ff4b4b;
+    border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    cursor: grab;
+    z-index: 101;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+.restore-btn i { pointer-events: none; color: white; }
+
+/* --- 介面動畫 --- */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.slide-fade-enter-active, .slide-fade-leave-active { transition: all 0.2s ease; }
+.slide-fade-enter-from, .slide-fade-leave-to { opacity: 0; transform: translateY(-10px); }

@@ -1,0 +1,23 @@
+type,key,value
+ui,panelTitle,youtube 弹幕控制台
+ui,language,语言设置
+ui,channel,频道连接
+ui,placeholderID,输入 youtube ID...
+ui,connect,连接
+ui,speed,飘过速度
+ui,fontSize,字体大小
+ui,region,显示区域
+ui,filter,过滤关键字
+ui,placeholderFilter,用逗号分隔关键字...
+ui,density,弹幕密度
+ui,systemTab,系统性能
+ui,fpsLimit,帧数限制
+ui,unlimited,无限制
+ui,miniSize,最小化球体大小
+regions,full,全屏幕
+regions,top,上半部
+regions,center,正中间
+regions,bottom,下半部
+status,connected,已连接
+status,disconnected,未连接
+status,connecting,连接中...

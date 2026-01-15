@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>YouTube Danmu Controller v1.0.0</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <div id="app" :style="systemVars">
+        <div id="danmu-layer">
+            <div v-for="msg in messages" :key="msg.id" class="danmu" :style="genDanmuStyle(msg)">
+                <span class="user-name">{{ msg.user }}:</span>
+                <span class="msg-text">{{ msg.text }}</span>
+            </div>
+        </div>
+
+        <main class="controls" v-show="!isMinimized" ref="panel" :style="{ left: panelPos.x + 'px', top: panelPos.y + 'px' }">
+            <div class="drag-header" @mousedown="startDrag">
+                <div style="display: flex; align-items: center; font-weight: bold;">
+                    <i class="fab fa-youtube" style="margin-right: 8px; color: #ff0000;"></i> 
+                    {{ t.ui.panelTitle }} <span :class="['status-dot', wsStatus]"></span>
+                    <img v-if="channelAvatar" :src="channelAvatar" class="avatar-preview">
+                </div>
+                
+                <div class="window-controls">
+                    <button @click.stop="toggleSettings" class="win-btn" :class="{ active: showSettings }">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                    <button @click.stop="minimizeWindow" class="win-btn">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button @click.stop="closeWindow" class="win-btn close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div> 
+
+            <transition name="slide-fade">
+                <div v-if="showSettings" class="settings-overlay" @mousedown.stop>
+                    <div class="settings-sidebar">
+                        <div class="sidebar-item" :class="{ active: currentTab === 'lang' }" @click="currentTab = 'lang'">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <div class="sidebar-item" :class="{ active: currentTab === 'system' }" @click="currentTab = 'system'">
+                            <i class="fas fa-microchip"></i>
+                        </div>
+                        <div class="sidebar-item" :class="{ active: currentTab === 'about' }" @click="currentTab = 'about'">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-main">
+                        <div v-if="currentTab === 'lang'" class="tab-content">
+                            <label class="tab-title">{{ t.ui.language }}</label>
+                            <div class="lang-option" v-for="(name, code) in langNames" :key="code" @click="settings.lang = code">
+                                <span class="lang-text">{{ name }}</span>
+                                <i v-show="settings.lang === code" class="fas fa-check check-mark"></i>
+                            </div>
+                        </div>
+
+                        <div v-if="currentTab === 'system'" class="tab-content">
+                            <label class="tab-title">{{ t.ui.systemTab }}</label>
+                            <div class="setting-item">
+                                <label>{{ t.ui.fpsLimit }} (0 = {{ t.ui.unlimited }})</label>
+                                <div class="flex-row">
+                                    <input type="range" v-model.number="settings.fpsLimit" min="0" max="270" step="1">
+                                    <input type="number" v-model.number="settings.fpsLimit" class="num-input">
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label>{{ t.ui.miniSize }}: {{ settings.miniSize }}px</label>
+                                <input type="range" v-model.number="settings.miniSize" min="30" max="100" step="2">
+                            </div>
+                        </div>
+
+                        <div v-if="currentTab === 'about'" class="tab-content">
+                                <label class="tab-title">About</label>
+                                <div class="about-info">
+                                    <p>Version: {{ version }}</p>
+                                    <p>© 2026 {{ author }}</p>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </transition>
+
+            <div class="control-content">
+                <div class="setting-item">
+                    <label>{{ t.ui.channel }}: {{ wsStatusText }}</label>
+                    <div class="flex-row">
+                        <input type="text" v-model="videoId" :placeholder="t.ui.placeholderID" @keyup.enter="connectYouTube">
+                        <button class="connect-btn" @click="connectYouTube">{{ t.ui.connect }}</button>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <label>{{ t.ui.speed }}: {{ settings.speed }}s | {{ t.ui.fontSize }}: {{ settings.fontSize }}px</label>
+                    <div class="flex-row">
+                        <input type="range" v-model.number="settings.speed" min="3" max="15">
+                        <input type="range" v-model.number="settings.fontSize" min="16" max="60">
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <label><i class="fas fa-layer-group"></i> {{ t.ui.density }}: {{ settings.density }}%</label>
+                    <input type="range" v-model.number="settings.density" min="10" max="100" step="10">
+                </div>
+
+                <div class="setting-item">
+                    <label>{{ t.ui.region }}: {{ t.regions[settings.region] }}</label>
+                    <select v-model="settings.region">
+                        <option v-for="(val, key) in t.regions" :key="key" :value="key">{{ val }}</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <label><i class="fas fa-filter"></i> {{ t.ui.filter }}</label>
+                    <input type="text" v-model="filterInput" :placeholder="t.ui.placeholderFilter" @input="updateFilterList">
+                </div>
+            </div>
+        </main>
+
+        <div v-if="isMinimized" 
+             @mousedown="startDrag" 
+             @click="restoreWindow" 
+             class="restore-btn" 
+             ref="miniBtn" 
+             :style="miniStyle">
+            <i class="fab fa-youtube" :style="{ fontSize: (settings.miniSize * 0.4) + 'px' }"></i>
+        </div>
+    </div>
+    <script src="js/app.js"></script>
+</body>
+</html>
