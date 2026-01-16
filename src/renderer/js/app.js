@@ -1,6 +1,6 @@
 /**
  * © 2026 JHAHQ. All rights reserved.
- * v2.3.1 - Enhanced Customization & Performance
+ * v2.3.2 - Translation Logic Fixed
  */
 const { createApp } = Vue;
 
@@ -11,10 +11,34 @@ try {
     ipcRenderer = { send: (c, ...a) => console.log(`[Web] ${c}`, a) };
 }
 
+// 定義原始繁體中文範本，作為語系切換的基底
+const defaultT = { 
+    ui: { 
+        panelTitle: 'Twitch 彈幕控制台', 
+        connect: '連線', 
+        settings: '設定',
+        channel: '頻道',
+        placeholderID: '輸入 ID...',
+        speed: '飄過速度',
+        fontSize: '字體大小',
+        density: '彈幕密度',
+        region: '顯示區域',
+        filter: '過濾關鍵字',
+        placeholderFilter: '用逗號分隔...',
+        language: '語言設定',
+        systemTab: '系統',
+        fpsLimit: '幀率限制',
+        unlimited: '無限制',
+        miniSize: '縮小尺寸'
+    }, 
+    regions: { full: '全螢幕', top: '頂部', center: '中間', bottom: '底部' }, 
+    status: { disconnected: '未連線' } 
+};
+
 createApp({
     data() {
         return {
-            version: '2.3.1',
+            version: '2.3.2',
             author: 'JHAHQ',
             channelName: '',
             wsStatus: 'disconnected',
@@ -24,19 +48,20 @@ createApp({
             showSettings: false,
             currentTab: 'lang',
             langNames: {
-                'zh-tw': '繁體中文', 'zh-cn': '简体中文', 'en': 'English',
+                'zh-TW': '繁體中文', 'zh-CN': '简体中文', 'en': 'English',
                 'jp': '日本語', 'ko': '한국어', 'fr': 'Français',
                 'de': 'Deutsch', 'es': 'Español', 'vi': 'Tiếng Việt', 'pt': 'Português'
             },
-            t: { ui: {}, regions: {}, status: {} },
+            // 當前顯示文字
+            t: JSON.parse(JSON.stringify(defaultT)),
             settings: { 
                 speed: 8, 
                 fontSize: 24, 
                 region: 'full',
                 lang: 'zh-tw',
                 density: 100,
-                fpsLimit: 60,   // 改為數值
-                miniSize: 54    // 圓球大小預設
+                fpsLimit: 60,
+                miniSize: 54
             },
             panelPos: { x: 50, y: 50 },
             isDragging: false,
@@ -53,52 +78,87 @@ createApp({
             return this.wsStatus === 'disconnected' ? (this.t.status?.disconnected || 'Offline') : this.channelName;
         },
         systemVars() {
-            // 動態控制渲染性能
             return {
                 '--fps-step': this.settings.fpsLimit > 0 ? `steps(${this.settings.fpsLimit * this.settings.speed})` : 'linear'
             };
         },
         miniStyle() {
             return {
-                left: this.panelPos.x + 'px',
-                top: this.panelPos.y + 'px',
                 width: this.settings.miniSize + 'px',
-                height: this.settings.miniSize + 'px'
+                height: this.settings.miniSize + 'px',
+                left: this.panelPos.x + 'px',
+                top: this.panelPos.y + 'px'
             };
         }
     },
     methods: {
         async loadLanguage(lang) {
-            try {
-                const response = await fetch(`./locales/${lang}.csv`);
-                const csvText = await response.text();
-                const lines = csvText.split('\n');
-                const newT = { ui: {}, regions: {}, status: {} };
-                lines.forEach((line, index) => {
-                    if (index === 0 || !line.trim()) return;
-                    const [type, key, value] = line.split(',');
-                    if (type && key && value && newT[type.trim()]) {
-                        newT[type.trim()][key.trim()] = value.trim();
-                    }
-                });
-                this.t = newT;
-            } catch (err) { console.error("Lang Load Error"); }
+            // 如果切換回繁體中文，直接還原範本即可，不需讀取 CSV
+            if (lang === 'zh-tw') {
+                this.t = JSON.parse(JSON.stringify(defaultT));
+                return;
+            }
+
+            const possiblePaths = [
+                `./locales/${lang}.csv`,
+                `../renderer/locales/${lang}.csv`,
+                `renderer/locales/${lang}.csv`,
+                `resources/app/renderer/locales/${lang}.csv`
+            ];
+
+            for (const pathStr of possiblePaths) {
+                try {
+                    const response = await fetch(pathStr);
+                    if (!response.ok) continue;
+                    
+                    const csvText = await response.text();
+                    const lines = csvText.split('\n');
+                    
+                    // 關鍵修正：每次讀取 CSV 都必須基於「原始範本」進行修改
+                    const newT = JSON.parse(JSON.stringify(defaultT));
+                    
+                    lines.forEach((line, index) => {
+                        if (index === 0 || !line.trim()) return;
+                        const [type, key, value] = line.split(',');
+                        const trimmedType = type?.trim();
+                        const trimmedKey = key?.trim();
+                        // 確保 key 存在於範本中才替換
+                        if (trimmedType && trimmedKey && value && newT[trimmedType]) {
+                            newT[trimmedType][trimmedKey] = value.trim();
+                        }
+                    });
+                    
+                    this.t = newT;
+                    console.log(`Lang loaded: ${lang}`);
+                    return; 
+                } catch (err) { }
+            }
         },
 
         async connectTwitch() {
             if (!this.channelName) return;
             this.wsStatus = 'connecting';
-            try {
-                const response = await fetch(`https://decapi.me/twitch/avatar/${this.channelName}`);
-                if (response.ok) this.channelAvatar = await response.text();
-            } catch (err) { console.error("Avatar fetch error"); }
+            this.channelAvatar = '';
+            
+            const cleanName = this.channelName.trim().toLowerCase();
+            const avatarUrl = `https://decapi.me/twitch/avatar/${cleanName}`;
+            
+            fetch(avatarUrl)
+                .then(res => res.text())
+                .then(data => {
+                    if (data && data.startsWith('http')) {
+                        this.channelAvatar = data;
+                    }
+                })
+                .catch(() => { this.channelAvatar = ''; });
 
             const socket = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
             socket.onopen = () => {
                 this.wsStatus = 'connected';
+                socket.send('CAP REQ :twitch.tv/tags twitch.tv/commands');
                 socket.send('PASS SCHMOOPIE');
                 socket.send(`NICK justinfan${Math.floor(Math.random() * 10000)}`);
-                socket.send(`JOIN #${this.channelName.toLowerCase()}`);
+                socket.send(`JOIN #${cleanName}`);
             };
             
             socket.onmessage = (event) => {
@@ -107,13 +167,12 @@ createApp({
                     const match = data.match(/:(\w+)!.*PRIVMSG #\w+ :(.*)/);
                     if (match) {
                         if (Math.random() * 100 > this.settings.density) return;
-                        const user = match[1];
-                        const text = match[2];
-                        if (this.filterList && this.filterList.some(word => text.includes(word))) return; 
-                        this.spawnDanmu(user, text);
+                        this.spawnDanmu(match[1], match[2]);
                     }
                 }
+                if (data.startsWith('PING')) socket.send('PONG :tmi.twitch.tv');
             };
+            socket.onclose = () => { this.wsStatus = 'disconnected'; };
         },
 
         spawnDanmu(user, text) {
@@ -140,10 +199,6 @@ createApp({
                 animationDuration: this.settings.speed + 's',
                 animationTimingFunction: this.settings.fpsLimit > 0 ? `steps(${this.settings.fpsLimit * this.settings.speed})` : 'linear'
             };
-        },
-
-        updateFilterList() {
-            this.filterList = this.filterInput.split(',').map(s => s.trim()).filter(s => s !== '');
         },
 
         startDrag(e) {
@@ -180,7 +235,6 @@ createApp({
             } else {
                 isInside = panelRect && (e.clientX >= panelRect.left && e.clientX <= panelRect.right && e.clientY >= panelRect.top && e.clientY <= panelRect.bottom);
             }
-
             ipcRenderer.send('set-ignore-mouse', !isInside);
         });
 

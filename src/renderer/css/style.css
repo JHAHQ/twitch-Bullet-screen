@@ -1,6 +1,6 @@
 /**
- * Twitch Danmu Controller v2.3.1
- * CSS - Aligned with YouTube Layout
+ * Twitch Danmu Controller v2.3.2
+ * CSS - Fixed Layout & Force Text Visibility
  */
 
 /* --- 基礎背景透明與效能優化 --- */
@@ -8,17 +8,30 @@ html, body {
     margin: 0; padding: 0;
     background-color: transparent !important;
     width: 100vw; height: 100vh;
-    color: #efeff1;
+    color: #ffffff !important; /* 強制白色 */
     font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
     overflow: hidden;
     contain: content;
 }
 
+/* 強制所有文字顯示，防止打包後透明 */
+span, label, p, div, b, i {
+    color: inherit;
+}
+.avatar-preview {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    margin-left: 10px;
+    border: 2px solid #9147ff;
+    object-fit: cover;
+    display: block; /* 確保它是區塊元素 */
+}
 /* --- 主控制面板 --- */
 .controls {
-    background: rgba(24, 24, 27, 0.8);  /* Twitch 版通常色調較深，維持 0.8 透明度 */
-    backdrop-filter: blur(15px);         /* 增加模糊強度增加質感 */
-    border: 1px solid rgba(145, 71, 255, 0.2); /* 邊框帶點紫色 */
+    background: rgba(24, 24, 27, 0.85) !important;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(145, 71, 255, 0.3);
     border-radius: 12px;
     width: 380px;
     position: fixed;
@@ -32,7 +45,6 @@ html, body {
 /* --- 拖拽頂部 --- */
 .drag-header {
     background: rgba(31, 31, 35, 0.7);
-    /* 其他屬性保持不變 */
     padding: 10px 15px;
     display: flex;
     justify-content: space-between;
@@ -66,7 +78,7 @@ html, body {
     position: absolute;
     top: 48px;
     left: 0; right: 0; bottom: 0;
-    background: rgba(24, 24, 27, 0.95);
+    background: rgba(24, 24, 27, 0.98) !important; /* 增加不透明度防止透底 */
     backdrop-filter: blur(10px);
     z-index: 10;
     display: flex;
@@ -75,7 +87,7 @@ html, body {
 
 .settings-sidebar {
     width: 50px;
-    background: #1f1f23;
+    background: rgba(31, 31, 35, 0.9);
     border-right: 1px solid #303032;
     display: flex; flex-direction: column; align-items: center; padding-top: 15px;
 }
@@ -97,7 +109,7 @@ html, body {
     align-items: center;
     justify-content: space-between;
     padding: 12px 15px;
-    background: #000000;
+    background: rgba(0, 0, 0, 0.4);
     border: 2px solid #3a3a3d;
     border-radius: 6px;
     margin-bottom: 8px;
@@ -106,7 +118,7 @@ html, body {
 }
 
 .lang-option:hover { border-color: #9147ff; }
-.lang-text { font-size: 0.9em; font-weight: 500; }
+.lang-text { font-size: 0.9em; font-weight: 500; color: #ffffff !important; }
 .check-mark { color: #9147ff; font-size: 14px; }
 
 /* --- 表單控制與滑條樣式 --- */
@@ -119,7 +131,7 @@ html, body {
 input[type="range"] {
     flex: 1;
     cursor: pointer;
-    accent-color: #9147ff; /* Twitch Purple */
+    accent-color: #9147ff;
     height: 6px;
 }
 
@@ -130,7 +142,7 @@ input[type="range"] {
     background: #000000 !important;
     border: 2px solid #3a3a3d !important;
     border-radius: 6px;
-    color: #9147ff;
+    color: #9147ff !important;
     font-weight: bold;
     outline: none;
 }
@@ -138,23 +150,24 @@ input[type="range"] {
 
 .controls input[type="text"], 
 .controls select {
-    background: #000000; color: #ffffff;
+    background: #000000; color: #ffffff !important;
     border: 2px solid #3a3a3d; padding: 10px 12px;
     border-radius: 6px; width: 100%; outline: none;
     box-sizing: border-box;
 }
 
 .connect-btn {
-    background: #9147ff !important; color: white; border: none;
+    background: #9147ff !important; color: white !important; border: none;
     padding: 10px 18px; border-radius: 6px; cursor: pointer; font-weight: bold;
 }
 
-/* --- 彈幕層與 GPU 優化 --- */
+/* --- 彈幕層 --- */
 #danmu-layer {
     position: fixed; top: 0; left: 0;
     width: 100vw; height: 100vh;
     pointer-events: none;
     transform: translateZ(0);
+    z-index: 1;
 }
 
 .danmu {
@@ -162,23 +175,22 @@ input[type="range"] {
     white-space: nowrap;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
     font-weight: 800;
-    color: #ffffff;
+    color: #ffffff !important;
     will-change: transform;
     animation: scroll linear forwards;
 }
 
-.user-name { color: #9147ff; margin-right: 8px; }
+.user-name { color: #bf94ff !important; margin-right: 8px; }
 
 @keyframes scroll {
     from { transform: translateX(100vw) translateZ(0); }
     to { transform: translateX(-120%) translateZ(0); }
 }
 
-/* --- 其他狀態組件 --- */
+/* --- 狀態組件 --- */
 .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-left: 8px; }
 .status-dot.disconnected { background: #ff4b4b; }
 .status-dot.connected { background: #00f593; box-shadow: 0 0 8px #00f593; }
-.avatar-preview { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #9147ff; margin-left: 8px; }
 
 .restore-btn {
     position: fixed;
@@ -189,9 +201,5 @@ input[type="range"] {
     z-index: 101;
     box-shadow: 0 4px 20px rgba(0,0,0,0.6);
 }
-.restore-btn i { pointer-events: none; color: white; }
 
-/* --- 介面動畫 --- */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-.slide-fade-enter-active, .slide-fade-leave-active { transition: all 0.2s ease; }
-.slide-fade-enter-from, .slide-fade-leave-to { opacity: 0; transform: translateY(-10px); }
