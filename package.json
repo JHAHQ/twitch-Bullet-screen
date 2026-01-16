@@ -1,14 +1,43 @@
 {
   "name": "youtube-danmu-controller",
-  "version": "1.0.0",
-  "description": "YouTube No-Key Danmu Controller",
+  "version": "1.0.1",
+  "description": "YouTubeDanmu",
   "main": "src/main/main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-builder"
   },
   "author": "JHAHQ",
-  "license": "ISC",
+  "license": "CC-BY-NC-SA-4.0",
   "devDependencies": {
-    "electron": "^28.0.0"
+    "electron": "^28.0.0",
+    "electron-builder": "^26.4.0"
+  },
+  "build": {
+    "appId": "com.jhahq.ytdanmu",
+    "productName": "YouTubeDanmu",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "src/renderer/locales",
+        "to": "locales",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "icon": "icon.ico"
+    },
+    "asar": true
   }
 }
